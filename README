@@ -1,0 +1,21 @@
+### Prerequisites
+
+Please install these using your distribution's package manager:
+
+pyqt5: https://pypi.org/project/PyQt5/
+Arrow: https://arrow.readthedocs.io/en/latest/#installation
+GZDoom: https://github.com/ZDoom/gzdoom
+stdbuf: You should already have this installed :)
+
+### Installation
+
+Extract these files anywhere and run gzdoom_speedrun_timer.py
+
+## Contributing
+
+This program is currently Linux-only. I could likely get it to run on Windows, but I'd need someone to test it for me as I don't use Microsoft software and neither should you!
+
+## License
+
+Distributed under the GPL3 License.
+
