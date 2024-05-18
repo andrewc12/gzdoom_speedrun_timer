@@ -5,11 +5,10 @@
 import os, json, bz2
 from sys import argv
 from math import floor
-from datetime import timedelta
+from datetime import datetime, timedelta
 from subprocess import Popen, PIPE
 from threading import Thread
 
-import arrow
 from PyQt5 import QtWidgets, QtCore, QtGui
 
 from mainwindow import Ui_MainWindow
@@ -226,11 +225,11 @@ class Level(LevelChapter):
     def __repr__(self):
             return f"Level({self.code}, modified={self.modified})"
 
-    def start_timer(self, start_time: arrow.arrow.Arrow) -> None:
+    def start_timer(self, start_time: datetime) -> None:
         "Start recording a speedrun time for this level."
         self._race_start = start_time
 
-    def stop_timer(self, stop_time: arrow.arrow.Arrow) -> bool:
+    def stop_timer(self, stop_time: datetime) -> bool:
         """Stop recording a speedrun time for this level.
         Return True if a personal best was set, False if not.
         This method sets this object's self.personal_best, self.session_time, and self.diff"""
@@ -255,7 +254,7 @@ class Level(LevelChapter):
         Raise RuntimeError if a timer hasn't been started yet.
         """
         try:
-            return self.pretty_time(arrow.now() - self._race_start)
+            return self.pretty_time(datetime.now() - self._race_start)
         except AttributeError:
             raise RuntimeError("get_current_time called before start_timer was called.")
 
@@ -310,7 +309,7 @@ class Chapter(LevelChapter):
     def __repr__(self):
         return f"Chapter({self.chapter_number}, modified={self.modified})"
 
-    def start_timer(self, start_time: arrow.arrow.Arrow, code: str) -> Level:
+    def start_timer(self, start_time: datetime, code: str) -> Level:
         "Start the timer for the contained level by code."
         self._current_level = self._get_level(code)
         self._current_level.start_timer(start_time)
@@ -330,7 +329,7 @@ class Chapter(LevelChapter):
             # else the level_numbers have been sequential so we leave _valid_sequence set True
         return self._current_level
 
-    def stop_timer(self, stop_time: arrow.arrow.Arrow) -> dict:
+    def stop_timer(self, stop_time: datetime) -> dict:
         """
         Stop the timer for the currently active level.
         Return a dict with the following values:
@@ -368,7 +367,7 @@ class Chapter(LevelChapter):
         """
         Get the current elapsed time of the currently running level as a pretty_time.
         This must be run after start_timer and before stop_timer.
-        No arrow arguments here as this for looks only and can be inaccurate.
+        No datetime arguments here as this for looks only and can be inaccurate.
         """
         try:
             return self._current_level.get_current_time()
@@ -667,13 +666,13 @@ class QChapter():
             if chapter.session_time != chapter.personal_best:
                 window.tableWidget.setItem(row, 3, self._make_centered_table_item(chapter.diff))
 
-    def start_timer(self, start_time: arrow.arrow.Arrow, code: str) -> None:
+    def start_timer(self, start_time: datetime, code: str) -> None:
         level = self.chapter.start_timer(start_time, code)
         window.tableWidget.scrollToItem(window.tableWidget.item(0, level.level_number-1), QtWidgets.QAbstractItemView.PositionAtCenter)
         #window.tableWidget.selectRow(level.level_number-1) # highlighting the entire row means it doesn't show the PB background color until it's unselected
         window.tableWidget.setCurrentCell(level.level_number-1, 0)
 
-    def stop_timer(self, stop_time: arrow.arrow.Arrow) -> None:
+    def stop_timer(self, stop_time: datetime) -> None:
         result = self.chapter.stop_timer(stop_time)
         level = result["level"]
         # set the lcd to match the final number in case the qtimer ending doesn't line up with us capturing the stop time.
@@ -823,7 +822,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     def level_started(self, level_info: dict) -> None:
         "This is called when a new level is started in gzdoom."
         # First take a snapshot of the time before we do any further processing
-        self.timer_start_time = arrow.now()
+        self.timer_start_time = datetime.now()
         while True:
             try: # start the level's timer
                 self.qchapter.start_timer(self.timer_start_time, level_info["code"])
@@ -862,7 +861,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     @QtCore.pyqtSlot()
     def level_finished(self) -> None:
         "This is called when a level ends in gzdoom."
-        stop_time = arrow.now()
+        stop_time = datetime.now()
         if hasattr(self, "qchapter"):
             self.timer.stop()
             self.qchapter.stop_timer(stop_time)

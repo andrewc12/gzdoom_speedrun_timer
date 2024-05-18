@@ -3,13 +3,12 @@
 Please install these using your distribution's package manager:
 
 pyqt5: https://pypi.org/project/PyQt5/
-Arrow: https://arrow.readthedocs.io/en/latest/#installation
 GZDoom: https://github.com/ZDoom/gzdoom
 stdbuf: You should already have this installed :)
 
 ### Installation
 
-Extract these files anywhere and run gzdoom_speedrun_timer.py
+Extract these files anywhere and run python gzdoom_speedrun_timer.py
 
 ## Contributing
 
